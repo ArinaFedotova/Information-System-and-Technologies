@@ -1,0 +1,112 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Список моих друзей ВКонтакте</title>
+    <script src="https://code.jquery.com/jquery-3.3.1.min.js"></script>
+    <link rel="stylesheet" type="text/css" href="style.css">
+</head>
+<body>
+    <h1>Список друзей ВКонтакте</h1>
+
+    <div class="input-group">
+        <button onclick="loadMyFriends()">Показать</button>
+        <button onclick="clearTable()">Очистить</button>
+    </div>
+
+    <div class="city-select">
+         <label for="city">Выберите город:</label>
+        <select id="city" onchange="filterByCity()">
+            <option value="">Все города</option>
+        </select>
+    </div>
+
+    <div id="friendTable"></div>
+
+    <script>
+        var friends = [];
+
+        function loadMyFriends(){
+            clearTable();
+            const accessToken = 'accessToken';
+            const userId = 'userId';
+            $.getJSON({
+                url: `https://api.vk.com/method/friends.get?user_id=${userId}&fields=bdate,city&access_token=${accessToken}&v=5.131`,
+                jsonp: "callback",
+                dataType: "jsonp",
+                success: function(response) {
+                    if (response.response) {
+                        friends = response.response.items;
+                        displayTable(friends);
+                        cityVariants(friends);
+                    } else {
+                        alert("Не удалось загрузить данные.");
+                    }
+                }
+            });
+        }
+
+        function displayTable(friends) {
+            var table = '<table><tr><th>ID</th><th>Имя</th><th>Фамилия</th><th>Дата Рождения</th><th>Город</th></tr>';
+            friends.forEach(function(friend) {
+                
+                const bdate = friend.bdate || 'Отсутствует';
+                const city = friend.city ? friend.city.title : 'Отсутствует';
+                
+                table += `<tr>
+                    <td>${friend.id}</td>
+                    <td>${friend.first_name}</td>
+                    <td>${friend.last_name}</td>
+                    <td>${bdate}</td>
+                    <td>${city}</td>
+                </tr>`;
+            });
+            table += '</table>';
+            $('#friendTable').html(table);
+        }
+
+        function filterByCity() {
+            const selectedCity = document.getElementById('city').value;
+            let filteredFriends = friends;
+
+            if (selectedCity) {
+                filteredFriends = friends.filter(function(friend) {
+                    return friend.city && friend.city.title === selectedCity;
+                });
+            }
+
+            displayTable(filteredFriends);
+        }
+
+        function cityVariants(friends) {
+            const citySelect = document.getElementById('city');
+            const cities = {};
+
+            friends.forEach(function(friend) {
+                if (friend.city && friend.city.title) {
+                    cities[friend.city.title] = true;
+                }
+            });
+            
+            for (let city in cities) {
+                const option = document.createElement('option');
+                option.value = city;
+                option.textContent = city;
+                citySelect.appendChild(option);
+            }
+        }
+
+        function clearTable() {
+            $('#friendTable').html('');
+            $('#city').val('');
+            $('#city').find('option').not(':first').remove();
+        }
+    </script>
+
+    <footer>
+        <p>© 2025 Федотова Арина.</p>
+        <p>Сайт использует API ВКонтакте для получения данных.</p>
+    </footer>
+</body>
+</html>

@@ -1,0 +1,103 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Города России</title>
+    <link rel="stylesheet" type="text/css" href="styleInd.css">
+</head>
+<body>
+    <header>Парсинг XML с использованием JavaScript</header>
+
+    <div class="input-group">
+        <div class="city-select">
+            <label for="city">Выберите город:</label>
+            <select id="city">
+            </select>
+        </div>
+        <button onclick="filterByCity()">Показать</button>
+    </div>
+
+    <div id="output" class="output"></div>
+
+    <script>
+        let citiesList = [];
+
+        function loadXML() {
+            const outputDiv = document.getElementById('output');
+            
+            var xhr = new XMLHttpRequest();
+            xhr.open('GET', 'cities.xml', false);
+            xhr.send();
+            if (xhr.status != 200) {
+                alert(xhr.status + ': ' + xhr.statusText);
+            } else {
+                const xmlDoc = xhr.responseXML;
+                citiesList = Array.from(xmlDoc.getElementsByTagName("city"));
+                
+                // Заполнение выпадающего списка городов
+                const citySelect = document.getElementById('city');
+                citiesList.forEach((city, index) => {
+                    const cityName = city.getElementsByTagName("name")[0].textContent;
+                    const option = document.createElement("option");
+                    option.value = index;
+                    option.textContent = cityName;
+                    citySelect.appendChild(option);
+                });
+            }
+        }
+
+        function filterByCity() {
+            const selectedCityIndex = document.getElementById('city').value;
+            const outputDiv = document.getElementById('output');
+
+            if (selectedCityIndex === "") {
+                outputDiv.innerHTML = '';
+                return;
+            }
+
+            const choosenCity = citiesList[selectedCityIndex];
+
+            const levels = ['generalinf', 'geography', 'population', 'numericalid'];
+            const nameLevels = ['Общая информация', 'География', 'Население', 'Числовые идентификаторы'];
+
+            let output = `<h3>Информация о выбранном городе:</h3>`;
+
+            for (let i = 0; i < levels.length; i++) {
+                const characteristics = choosenCity.getElementsByTagName(levels[i]);
+
+                if (characteristics.length === 0) {
+                    continue;
+                }
+
+                output += `<h4>${nameLevels[i]}</h4><ul>`;
+
+                for (let j = 0; j < characteristics.length; j++) {
+                    const levelNode = characteristics[j];
+                    const children = levelNode.children;
+
+                    for (let k = 0; k < children.length; k++) {
+                        const childNode = children[k];
+                        if (childNode.tagName !== 'headers2'){
+                            output += `<li><strong>${childNode.tagName}:</strong> ${childNode.textContent}</li>`;
+                        }
+                    }
+                }
+
+                output += `</ul>`;
+            }
+
+            outputDiv.innerHTML = output;
+        }
+        
+        window.onload = function() {
+            loadXML();
+        };
+    </script>
+
+    <footer>
+        <p>&copy; 2025 Города России</p>
+        <p>Федотова Арина</p>
+    </footer>
+</body>
+</html>

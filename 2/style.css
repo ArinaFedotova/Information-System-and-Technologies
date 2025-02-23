@@ -1,0 +1,174 @@
+body {
+    font-family: 'Arial', sans-serif;
+    background-color: #f4f4f4;
+    margin: 0;
+    padding: 20px;
+    color: #333;
+}
+
+header {
+    display: block;
+    text-align: center;
+    font-size: 48px;
+    color: #2c3e50; 
+    margin-top: 30px;
+    margin-bottom: 30px;
+    text-transform: uppercase; 
+    letter-spacing: 2px; 
+    position: relative; 
+}
+
+header::before {
+    display: block;
+    content: ''; 
+    position: absolute;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 90%; 
+    height: 4px; 
+    background-color: #7f8c8d; 
+    margin-bottom: 15px;
+}
+
+header::after {
+    display: block;
+    content: '';
+    position: absolute;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 90%; 
+    height: 4px; 
+    background-color: #7f8c8d; 
+    margin-top: 5px;
+}
+
+
+
+city {
+    display: block;
+    background-color: #ffffff;
+    border-radius: 8px;
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.3);
+    padding: 20px;
+    margin-bottom: 20px;
+}
+
+generalinf {
+    display: block;
+    border-bottom: 2px solid #3498db;
+    padding-bottom: 10px;
+    margin-bottom: 15px; /* Увеличиваем отступ снизу */
+}
+
+name {
+    font-size: 24px;
+    color: #2980b9;
+}
+
+federalsub, head {
+    display: block;
+    text-align: right;
+    font-size: 18px;
+    color: #7f8c8d;
+}
+
+geography, population, numericalid {
+    display: block;
+    margin-bottom: 5px;
+    padding-top: 10px; 
+
+}
+
+headers2{
+    display: block;
+    font-size: 18px;
+    color: #2c3e50;
+    margin-top: 5px;
+    margin-bottom: 5px; 
+}
+
+area {
+    display: block;
+    font-size: 16px;
+    color: #27ae60;
+    background-color: #eafaf1; /* Светло-зеленый фон */
+    padding: 5px;
+    border-radius: 4px;
+}
+
+timezone {
+    display: block;
+    font-size: 16px;
+    color: #2980b9; /* Синий текст */
+    background-color: #d9eaf7; /* Светло-голубой фон */
+    padding: 5px;
+    border-radius: 4px;
+}
+
+climate {
+    display: block;
+    font-size: 16px;
+    color: #e67e22; /* Оранжевый текст */
+    background-color: #fef3e6; /* Светло-оранжевый фон */
+    padding: 5px;
+    border-radius: 4px;
+}
+
+size {
+    display: block;
+    font-size: 16px;
+    color: #e74c3c; /* Красный текст */
+    background-color: #fce4e4; /* Светло-красный фон */
+    padding: 5px;
+    border-radius: 4px;
+}
+
+density {
+    display: block;
+    font-size: 16px;
+    color: #8e44ad; /* Фиолетовый текст */
+    background-color: #f2e6ff; /* Светло-фиолетовый фон */
+    padding: 5px;
+    border-radius: 4px;
+}
+
+nameofresidents {
+    display: block;
+    font-size: 16px;
+    color: #3498db; /* Ярко-синий текст */
+    background-color: #e6f7ff; /* Светло-синий фон */
+    padding: 5px;
+    border-radius: 4px;
+}
+
+dialingcode {
+    display: block;
+    font-size: 16px;
+    color: #2c3e50; /* Темно-синий текст */
+    background-color: #f0f8ff; /* Светло-голубой фон */
+    padding: 5px;
+    border-radius: 4px;
+}
+
+postalcode {
+    display: block;
+    font-size: 16px;
+    color: #d35400; /* Оранжево-коричневый текст */
+    background-color: #fcf3e6; /* Светло-оранжевый фон */
+    padding: 5px;
+    border-radius: 4px;
+}
+
+author {
+    display: block;
+    font-size: 18px;
+    color: #2c3e50;
+    margin-top: 5px;
+    text-align: right;
+    margin-right: 10px;
+    margin-bottom: 5px;
+    background-color: #ffffff;
+    border-radius: 8px;
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.3);
+    padding: 20px;
+}

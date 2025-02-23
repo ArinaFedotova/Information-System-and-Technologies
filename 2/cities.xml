@@ -1,0 +1,124 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<?xml-stylesheet type="text/css" href="style.css"?>
+
+<cities-list>
+    <header>🪆 Города России 🪆</header>
+
+    <city>
+        <generalinf>
+            <name>Красноярск</name>
+            <federalsub>Красноярский край</federalsub>
+            <head>Владислав Логинов</head>
+        </generalinf>
+
+        <geography>
+            <headers2>География: </headers2>
+            <area>380 км²</area>
+            <timezone>UTC+7:00</timezone>
+            <climate>континентальный</climate>
+        </geography>
+
+        <population>
+            <headers2>Население: </headers2>
+            <size>1 205 473 человека (2024)</size>
+            <density>2765 чел./км²</density>
+            <nameofresidents>красноя́рцы, красноя́рец, красноя́рка</nameofresidents>
+        </population>
+
+        <numericalid>
+            <headers2>Числовые индентификаторы: </headers2>
+            <dialingcode>+7 391</dialingcode>
+            <postalcode>660ххх</postalcode>
+        </numericalid>
+    </city>
+
+
+    <city>
+        <generalinf>
+            <name>Омск</name>
+            <federalsub>Омская область</federalsub>
+            <head>Сергей Шелест</head>
+        </generalinf>
+
+        <geography>
+            <headers2>География: </headers2>
+            <area>566,9 км²</area>
+            <timezone>UTC+6:00</timezone>
+            <climate>континентальный</climate>
+        </geography>
+
+        <population>
+            <headers2>Население: </headers2>
+            <size>1 104 485 человек (2024)</size>
+            <density>1948,29 чел./км²</density>
+            <nameofresidents>омичи́, оми́ч, оми́чка</nameofresidents>
+        </population>
+
+        <numericalid>
+            <headers2>Числовые индентификаторы: </headers2>
+            <dialingcode>+7 3812</dialingcode>
+            <postalcode>644xxx</postalcode>
+        </numericalid>
+
+    </city>
+
+
+    <city>
+        <generalinf>
+            <name>Москва</name>
+            <federalsub>Москва</federalsub>
+            <head>Сергей Собянин</head>
+        </generalinf>
+
+        <geography>
+            <headers2>География: </headers2>
+            <area>2561,5 км²</area>
+            <timezone>UTC+3:00</timezone>
+            <climate>умеренно континентальный</climate>
+        </geography>
+
+        <population>
+            <headers2>Население: </headers2>
+            <size>13 149 803 человек (2024)</size>
+            <density>5133,63 чел./км²</density>
+            <nameofresidents>москвичи́, москви́ч, москви́чка</nameofresidents>
+        </population>
+
+        <numericalid>
+            <headers2>Числовые индентификаторы: </headers2>
+            <dialingcode>+7 495, 499</dialingcode>
+            <postalcode>101000—135999</postalcode>
+        </numericalid>
+
+    </city>
+
+    <city>
+        <generalinf>
+            <name>Владивосток</name>
+            <federalsub>Приморский край</federalsub>
+            <head>Константин Шестаков</head>
+        </generalinf>
+
+        <geography>
+            <headers2>География: </headers2>
+            <area>325,99 км²</area>
+            <timezone>UTC+10:00</timezone>
+            <climate>умеренно муссонный</climate>
+        </geography>
+
+        <population>
+            <headers2>Население: </headers2>
+            <size>591 628 человек (2024)</size>
+            <density>1786,53 чел./км²</density>
+            <nameofresidents>владивостокцы, владивостокчане</nameofresidents>
+        </population>
+
+        <numericalid>
+            <headers2>Числовые индентификаторы: </headers2>
+            <dialingcode>+7 423</dialingcode>
+            <postalcode>690000–690999</postalcode>
+        </numericalid>
+    </city>
+
+    <author> © Федотова Арина </author>
+</cities-list>

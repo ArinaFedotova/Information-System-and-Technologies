@@ -1,0 +1,1 @@
+open -na "Google Chrome" --args --allow-file-access-from-files
