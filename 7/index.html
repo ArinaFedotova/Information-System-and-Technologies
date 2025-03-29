@@ -1,0 +1,199 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Telegram Reader</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+<div class="container">
+  <h1>Последнее сообщение из tg бота</h1>
+
+  <div id="output" class="message-container"></div>
+
+  <button id="loadMessagesButton">Загрузить последнее сообщение</button>
+
+  <div id="response-container">
+    <input type="text" id="response-text" placeholder="Введите ваш ответ..." />
+    <button id="send-response" disabled>Отправить ответ</button>
+  </div>
+
+</div>
+
+<footer>
+  <div class="footer-content">
+    <p>&copy; 2025. Все права защищены.</p>
+    <p>Федотова Арина</p>
+  </div>
+</footer>
+
+<script>
+  const BOT_TOKEN = 'BOT TOKEN';
+  let lastUpdateId = 0;
+  let currentMessageId = null;
+  let currentChatId = null;
+
+  const responseContainer = document.getElementById('response-container');
+  const responseTextInput = document.getElementById('response-text');
+  const sendResponseButton = document.getElementById('send-response');
+
+  // Функция для загрузки только одного последнего сообщения
+  async function fetchLatestMessage() {
+    try {
+      currentMessageId = null;
+      currentChatId = null;
+      const response = await fetch(`https://api.telegram.org/bot${BOT_TOKEN}/getUpdates?offset=${lastUpdateId + 1}`);
+      const data = await response.json();
+
+      if (data.result.length > 0) {
+        const latestMessage = data.result[data.result.length - 1];
+        lastUpdateId = latestMessage.update_id;
+        return latestMessage;
+      }
+      return null;
+    } catch (error) {
+      console.error('Ошибка:', error);
+      return null;
+    }
+  }
+
+  async function renderLatestMessage(update) {
+    const output = document.getElementById('output');
+
+    if (!update || !update.message) {
+      output.innerHTML = '<div class="no-messages">Новых сообщений нет</div>';
+      sendResponseButton.disabled = true;
+      alert("Сообщений не было получено!")
+      return;
+    }
+    const msg = update.message;
+    const profile = await getUserProfile(msg.from.id);
+
+    currentChatId = msg.chat.id;
+    currentMessageId = msg.message_id;
+
+    let html = null;
+    if (msg.sticker) {
+      const stickerUrl = await getStickerUrl(msg.sticker.file_id);
+
+      html = `
+        <div class="message-card">
+          ${profile.photo ?
+              `<img class="avatar" src="${profile.photo}" alt="Аватар">` :
+              `<div class="avatar" style="background: #ccc;"></div>`}
+          <div class="message-content">
+            <strong>${msg.from.first_name}</strong>
+            <p>Стикер:</p>
+            <img src="${stickerUrl}" alt="Стикер" class="sticker">
+            <div class="timestamp">
+              ${new Date(msg.date * 1000).toLocaleString()}
+            </div>
+          </div>
+        </div>
+      `;
+    } else {
+        html = `
+          <div class="message-card">
+            ${profile.photo ?
+                `<img class="avatar" src="${profile.photo}" alt="Аватар">` :
+                `<div class="avatar" style="background: #ccc;"></div>`}
+            <div class="message-content">
+              <strong>${msg.from.first_name}</strong>
+              <p>${msg.text || 'Сообщение без текста'}</p>
+              <div class="timestamp">
+                ${new Date(msg.date * 1000).toLocaleString()}
+              </div>
+            </div>
+          </div>
+        `;
+    }
+    output.innerHTML = html;
+
+    sendResponseButton.disabled = false;
+  }
+
+  async function getStickerUrl(fileId) {
+    try {
+      const response = await fetch(`https://api.telegram.org/bot${BOT_TOKEN}/getFile?file_id=${fileId}`);
+      const data = await response.json();
+
+      if (data.ok) {
+        return `https://api.telegram.org/file/bot${BOT_TOKEN}/${data.result.file_path}`;
+      } else {
+        console.error('Не удалось получить файл стикера');
+        return '';
+      }
+    } catch (error) {
+      console.error('Ошибка получения стикера:', error);
+      return '';
+    }
+  }
+
+  async function getUserProfile(userId) {
+    try {
+      const response = await fetch(`https://api.telegram.org/bot${BOT_TOKEN}/getUserProfilePhotos?user_id=${userId}`);
+      const data = await response.json();
+
+      if (data.result.photos?.length > 0) {
+        const fileId = data.result.photos[0][0].file_id;
+        const fileResponse = await fetch(`https://api.telegram.org/bot${BOT_TOKEN}/getFile?file_id=${fileId}`);
+        const fileData = await fileResponse.json();
+        return {
+          photo: `https://api.telegram.org/file/bot${BOT_TOKEN}/${fileData.result.file_path}`
+        };
+      }
+      return { photo: null };
+    } catch (error) {
+      console.error('Ошибка профиля:', error);
+      return { photo: null };
+    }
+  }
+
+  async function sendResponse() {
+    const text = responseTextInput.value.trim();
+
+    if (currentChatId && currentMessageId && text) {
+      try {
+        const response = await fetch(`https://api.telegram.org/bot${BOT_TOKEN}/sendMessage`, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json'
+          },
+          body: JSON.stringify({
+            chat_id: currentChatId,
+            text: text,
+            reply_to_message_id: currentMessageId,
+          })
+        });
+
+        const data = await response.json();
+        if (data.ok) {
+          alert('Ответ отправлен!');
+          responseTextInput.value = '';
+        } else {
+          alert('Не удалось отправить ответ');
+        }
+      } catch (error) {
+        console.error('Ошибка отправки ответа:', error);
+      }
+    } else {
+      if (text == null) {
+        alert("Введите текст сообщения")
+      } else {
+        alert('Не было получено сообщение, на которое направляется ответ!');
+      }
+    }
+  }
+
+  const loadMessagesButton = document.getElementById('loadMessagesButton');
+  loadMessagesButton.addEventListener('click', async () => {
+    const output = document.getElementById('output');
+    output.innerHTML = 'Идет загрузка ⏳';
+    const update = await fetchLatestMessage();
+    renderLatestMessage(update);
+  });
+  sendResponseButton.addEventListener('click', sendResponse);
+</script>
+</body>
+</html>
