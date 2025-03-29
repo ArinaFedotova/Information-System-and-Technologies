@@ -1,0 +1,224 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>VK API</title>
+    <script src="https://code.jquery.com/jquery-3.3.1.min.js"></script>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <div class="container">
+        <h2>Работа с VK API</h2>
+        <p>
+            Для получения access token необходимо перейти на страницу авторизации (при нажатии кнопки ниже),
+            а затем скопировать в адресной строке только ту часть, что находится между '=' и '&'.
+        </p>
+
+        <button onclick="authorizeVK()">Авторизация</button>
+        <div class="status" id="status"></div>
+
+        <div class="action-container">
+            <input type="text" id="accessToken" placeholder="Введите access token">
+            <button onclick="setToken()">Установить токен</button>
+        </div>
+
+        <label for="accountId">Введите ID аккаунта:</label>
+        <select id="accountId" onchange="setAccountId()">
+            <option value="">Выберите фамилию</option>
+            <option value="USER ID">Федотова Арина</option>
+            <option value="USER ID">Бочеева Ульяна</option>
+            <option value="USER ID">Марченко Андрей</option>
+            <option value="USER ID">Самилык Артём</option>
+        </select>
+
+        <label>Выберите действие: </label>
+
+        <div class="action-container">
+            <input type="text" id="likePostId" placeholder="ID поста">
+            <button onclick="likePost()">Поставить лайк</button>
+        </div>
+
+        <div class="action-container">
+            <input type="text" id="postText" placeholder="Введите текст поста">
+            <button onclick="sendPost()">Оставить пост</button>
+        </div>
+
+        <div class="action-container">
+            <input type="text" id="commentPostId" placeholder="ID поста">
+            <input type="text" id="commentText" placeholder="Введите комментарий">
+            <button onclick="sendComment()">Оставить комментарий</button>
+        </div>
+
+        <div class="action-container">
+            <input type="text" id="pinId" placeholder="ID поста">
+            <button onclick="pinPost()">Закрепить пост</button>
+        </div>
+    </div>
+
+    <footer>
+        <div class="footer-content">
+            <p>&copy; 2025 VK API Integration. Все права защищены.</p>
+            <p>Федотова Арина</p>
+        </div>
+    </footer>
+
+    <script>
+        const appId = "APP ID";
+        let accessToken = null;
+
+        function setAccountId() {
+            const accountId = document.getElementById('accountId').value;
+            document.getElementById('accountId').value = accountId;
+        }
+
+        function setToken() {
+            accessToken = document.getElementById('accessToken').value.trim();
+
+            if(accessToken) {
+                document.getElementById('status').innerHTML = 'Токен успешно получен';
+            } else {
+                document.getElementById('status').innerHTML = 'Введите токен';
+            }
+        }
+
+        function authorizeVK() {
+            const redirectUri = "https://oauth.vk.com/blank.html"; // https://oauth.vk.com/blank.html
+            const scope = ["wall"];
+            const url = new URL(`https://oauth.vk.com/authorize?client_id=${appId}&display=page&redirect_uri=${redirectUri}&scope=${scope}&response_type=token&v=5.199`);
+            window.open(url.href, '_blank');
+        }
+
+        function likePost() {
+            const accountId = document.getElementById('accountId').value;
+            const postId = document.getElementById('likePostId').value;
+
+            if (accountId && postId) {
+                $.ajax({
+                    url: `https://api.vk.com/method/${'likes.add'}`,
+                    data: {
+                        type: 'post',
+                        owner_id: accountId,
+                        item_id: postId,
+                        access_token: accessToken,
+                        v: '5.199'
+                    },
+                    dataType: 'jsonp',
+                    jsonp: 'callback',
+                    success: function(response) {
+                        if (response.error) {
+                            alert('Ошибка: ' + response.error.error_msg);
+                        } else {
+                            alert('Пост успешно оценен!');
+                        }
+                    },
+                    error: function() {
+                        alert('Произошла ошибка при отправке запроса');
+                    }
+                });
+            }
+            else {
+                alert('Пожалуйста, заполните оба поля.');
+            }
+        }
+
+        function sendPost() {
+            const message = document.getElementById('postText').value;
+            const accountId = document.getElementById('accountId').value;
+            if (accountId && message) {
+                $.ajax({
+                    url: `https://api.vk.com/method/${'wall.post'}`,
+                    data: {
+                        type: 'post',
+                        owner_id: accountId,
+                        message: message,
+                        access_token: accessToken,
+                        privacy_view: 'friends',
+                        v: '5.199'
+                    },
+                    dataType: 'jsonp',
+                    jsonp: 'callback',
+                    success: function(response) {
+                        if (response.error) {
+                            alert('Ошибка: ' + response.error.error_msg);
+                        } else {
+                            alert('Пост успешно опубликован!');
+                        }
+                    },
+                    error: function() {
+                        alert('Произошла ошибка при отправке запроса');
+                    }
+                });
+            } else {
+                alert('Пожалуйста, заполните поля id и текста сообщения.');
+            }
+        }
+
+        function sendComment() {
+            const accountId = document.getElementById('accountId').value;
+            const postId = document.getElementById('commentPostId').value;
+            const message = document.getElementById('commentText').value;
+
+            if (message && postId && accountId) {
+                $.ajax({
+                    url: `https://api.vk.com/method/${'wall.createComment'}`,
+                    data: {
+                        type: 'post',
+                        owner_id: accountId,
+                        post_id: postId,
+                        message: message,
+                        access_token: accessToken,
+                        v: '5.199'
+                    },
+                    dataType: 'jsonp',
+                    jsonp: 'callback',
+                    success: function(response) {
+                        if (response.error) {
+                            alert('Ошибка: ' + response.error.error_msg);
+                        } else {
+                            alert('Комментарий к посту успешно отправлен!');
+                        }
+                    },
+                    error: function() {
+                        alert('Произошла ошибка при отправке запроса');
+                    }
+                });
+                } else {
+                alert('Пожалуйста, заполните поля id аккаунта, id поста и текста ' +
+                    'комментария.');
+            }
+        }
+
+        function pinPost() {
+            const postId = document.getElementById('pinId').value;
+            const accountId = document.getElementById('accountId').value;
+            if (accountId && postId) {
+                $.ajax({
+                    url: `https://api.vk.com/method/${'wall.pin'}`,
+                    data: {
+                        type: 'post',
+                        owner_id: accountId,
+                        post_id: postId,
+                        access_token: accessToken,
+                        v: '5.199'
+                    },
+                    dataType: 'jsonp',
+                    jsonp: 'callback',
+                    success: function(response) {
+                        if (response.error) {
+                            alert('Ошибка: ' + response.error.error_msg);
+                        } else {
+                            alert('Пост успешно закреплен!');
+                        }
+                    },
+                    error: function() {
+                        alert('Произошла ошибка при отправке запроса');
+                    }
+                });
+            } else {
+                alert('Пожалуйста, заполните поля id и текста сообщения.');
+            }
+        }
+    </script>
+</body>
+</html>
