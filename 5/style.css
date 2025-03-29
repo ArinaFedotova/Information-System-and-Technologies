@@ -1,0 +1,104 @@
+body {
+    font-family: 'Arial', sans-serif;
+    background-color: #f4f7fb;
+    margin: 0;
+    padding: 0;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+
+h1 {
+    margin-top: 30px;
+    font-size: 2rem;
+    color: #333;
+}
+
+.refresh-info {
+    font-size: 0.9rem;
+    color: #666;
+    margin-bottom: 20px;
+}
+
+#output {
+    width: 90%;
+    max-width: 800px;
+    margin-bottom: 50px;
+}
+
+/* Стили для контейнера сообщений */
+.message-container {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 10px;
+    margin-bottom: 30px;
+}
+
+/* Стили для сообщения */
+.message-card {
+    display: flex;
+    flex-direction: row;
+    background-color: #ffffff;
+    padding: 12px;
+    border-radius: 20px;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+    max-width: 100%;
+    width: 100%;
+    transition: box-shadow 0.3s;
+}
+
+.message-card:hover {
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+}
+
+/* Стили для аватара */
+.avatar {
+    width: 50px;
+    height: 50px;
+    border-radius: 50%;
+    background-color: #ccc;
+    margin-right: 15px;
+    object-fit: cover;
+}
+
+/* Стили для содержимого сообщения */
+.message-content {
+    display: flex;
+    flex-direction: column;
+    max-width: 100%;
+}
+
+.timestamp {
+    font-size: 0.8rem;
+    color: #888;
+    margin-bottom: 5px;
+}
+
+.message-content strong {
+    font-size: 1.1rem;
+    color: #333;
+    margin-bottom: 5px;
+}
+
+.message-content p {
+    font-size: 1rem;
+    color: #444;
+    margin: 0;
+}
+
+/* Мобильные стили */
+@media (max-width: 600px) {
+    .message-card {
+        flex-direction: column;
+        align-items: flex-start;
+    }
+
+    .avatar {
+        margin-bottom: 10px;
+    }
+
+    .message-content {
+        width: 100%;
+    }
+}
