@@ -1,0 +1,444 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>VK API</title>
+    <script src="https://code.jquery.com/jquery-3.3.1.min.js"></script>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+<div class="container">
+    <h2>Работа с VK API</h2>
+    <p>
+        Для получения access token необходимо перейти на страницу авторизации (при нажатии кнопки ниже),
+        а затем скопировать в адресной строке только ту часть, что находится между '=' и '&'.
+    </p>
+
+    <button onclick="authorizeVK()">Авторизация</button>
+    <div class="status" id="status"></div>
+
+    <div class="action-container">
+        <input type="text" id="accessToken" placeholder="Введите access token">
+        <button onclick="setToken()">Установить токен</button>
+    </div>
+
+    <label for="groupId">Выберите группу:</label>
+    <select id="groupId" onchange="setGroupId()">
+        <option value="">Выберите группу</option>
+    </select>
+
+    <div class="action-container">
+        <button onclick="getMembersFriends()">Вывести друзей участников группы</button>
+    </div>
+    <label>Найдено друзей: </label>
+    <div id="friendsCount">0</div>
+    <div id="membersTableContainer"></div>
+
+<!--    <div class="action-container">-->
+<!--        <label>Лайкнуть посты 5 друзей, которые последние были в сети</label>-->
+<!--        <button onclick="likeLastOnline()">Лайкнуть посты</button>-->
+<!--    </div>-->
+
+    <div class="action-container">
+        <label>Опубликовать пост с названиям 5 групп, в которых я состою, и количеством участников в них</label>
+        <button onclick="postGroups()">Опубликовать</button>
+    </div>
+
+    <div class="action-container">
+        <label>Самый популярный друг</label>
+        <button onclick="mostPopularFriend()">Найти</button>
+    </div>
+
+    <div id="popularFriendContent"></div>
+
+    <div class="action-container">
+        <label>Последний пост в ленте</label>
+        <button onclick="processNewsfeed()">Показать пост</button>
+    </div>
+    <div id="lastPostContent"></div>
+
+</div>
+<footer>
+    <div class="footer-content">
+        <p>&copy; 2025 VK API Integration. Все права защищены.</p>
+        <p>Федотова Арина</p>
+    </div>
+</footer>
+
+<script>
+    const appId = "APP ID";
+    let accessToken = null;
+    const myAccountId = 'MY ID';
+
+    function setGroupId() {
+        const groupId = document.getElementById('groupId').value;
+        document.getElementById('groupId').value = groupId;
+    }
+
+    function setToken() {
+        accessToken = document.getElementById('accessToken').value.trim();
+
+        if(accessToken) {
+            document.getElementById('status').innerHTML = 'Токен успешно получен';
+            loadGroups();
+        } else {
+            document.getElementById('status').innerHTML = 'Введите токен';
+        }
+    }
+
+    function authorizeVK() {
+        const redirectUri = "https://oauth.vk.com/blank.html"; // https://oauth.vk.com/blank.html
+        const scope = ["wall,friends,groups,stats,offline"];
+        const url = new URL(`https://oauth.vk.com/authorize?client_id=${appId}&display=page&redirect_uri=${redirectUri}&scope=${scope}&response_type=token&v=5.199`);
+        window.open(url.href, '_blank');
+    }
+
+    async function loadGroups() {
+        if (!accessToken) {
+            alert("Пожалуйста, установите токен.");
+            return;
+        }
+
+        try {
+            const groupsResponse = await $.ajax({
+                url: `https://api.vk.com/method/groups.get`,
+                data: {
+                    user_id: myAccountId,
+                    extended: 1,
+                    fields: "members_count",
+                    access_token: accessToken,
+                    v: '5.199'
+                },
+                dataType: 'jsonp',
+                jsonp: 'callback'
+            });
+
+            if (groupsResponse.error) {
+                alert('Ошибка при получении групп: ' + groupsResponse.error.error_msg);
+                return;
+            }
+
+            const groupSelect = document.getElementById('groupId');
+            groupSelect.innerHTML = '<option value="">Выберите группу</option>'; // Очищаем текущие данные в списке
+
+            groupsResponse.response.items.forEach(group => {
+                const option = document.createElement('option');
+                option.value = group.id;
+                option.textContent = `${group.name} (${group.members_count} участников)`;
+                groupSelect.appendChild(option);
+            });
+
+        } catch (error) {
+            alert('Произошла ошибка при отправке запроса на группы: ' + error.message);
+        }
+    }
+
+    async function getMembersFriends(){
+        const groupId = document.getElementById('groupId').value;
+        const accessToken = document.getElementById('accessToken').value;
+        const limit = 10; // Установите необходимое ограничение
+
+        if (!groupId || !accessToken) {
+            alert("Пожалуйста, укажите токен доступа и выберите группу.");
+            return;
+        }
+
+        try {
+            const membersResponse = await $.ajax({
+                url: `https://api.vk.com/method/groups.getMembers`,
+                data: {
+                    group_id: groupId,
+                    access_token: accessToken,
+                    v: '5.199'
+                },
+                dataType: 'jsonp',
+                jsonp: 'callback'
+            });
+
+            if (membersResponse.error) {
+                alert('Ошибка: ' + membersResponse.error.error_msg);
+                return;
+            }
+
+            if (membersResponse.response) {
+                const count = membersResponse.response.count;
+                const members = membersResponse.response.items;
+
+                const friends = {};
+                for (const member of members) {
+                    const friendsResponse = await $.ajax({
+                        url: `https://api.vk.com/method/friends.get`,
+                        data: {
+                            user_id: member,
+                            access_token: accessToken,
+                            v: '5.199'
+                        },
+                        dataType: 'jsonp',
+                        jsonp: 'callback'
+                    });
+
+                    if (friendsResponse.response) {
+                        // Для каждого друга из ответа сохраняем данные в словарь
+                        friendsResponse.response.items.forEach(friendId => {
+                            friends[friendId] = true;
+                        });
+                        $('#friendsCount').html(Object.keys(friends).length);
+                    }
+                    await new Promise(r => setTimeout(r, 500));
+                }
+                // Выводим количество найденных друзей
+                $('#friendsCount').html(friends.length);
+            }
+
+        } catch (error) {
+            alert('Произошла ошибка при отправке запроса: ' + error);
+        }
+    }
+
+    //создать пост у себя на стене. Этот пост должен содержать названия и количество участников
+    // пяти групп, в которых вы состоите.
+    async function postGroups() {
+        const groups = await $.ajax({
+            url: `https://api.vk.com/method/${'groups.get'}`,
+            data: {
+                user_id: myAccountId,
+                extended: 1,
+                fields: "members_count",
+                access_token: accessToken,
+                v: '5.199'
+            },
+            dataType: 'jsonp',
+            jsonp: 'callback',
+            error: function() {
+                alert('Произошла ошибка при отправке запроса');
+            }
+        });
+
+        let text = 'None groups was found';
+        if (groups.response) {
+            text = '';
+            for (const group of groups.response.items.slice(0, 5)) {
+                text += `${group.name} ${group.members_count} участников\n`
+            }
+        }
+        const publish = confirm(`Хотите опубликовать следующий текст?\n\n${text}`);
+
+        if (publish) {
+            try {
+                await $.ajax({
+                    url: `https://api.vk.com/method/wall.post`,
+                    data: {
+                        owner_id: myAccountId,
+                        message: text,
+                        access_token: accessToken,
+                        privacy_view: 'friends',
+                        v: '5.199'
+                    },
+                    dataType: 'jsonp',
+                    jsonp: 'callback',
+                    success: function(response) {
+                        if (response.error) {
+                            alert('Ошибка при публикации поста: ' + response.error.error_msg);
+                        } else {
+                            alert('Пост успешно опубликован!');
+                        }
+                    },
+                    error: function() {
+                        alert('Произошла ошибка при отправке запроса');
+                    }
+                });
+                await new Promise(r => setTimeout(r, 500));
+            } catch (error) {
+                alert('Произошла ошибка при публикации поста: ' + error.message);
+            }
+        } else {
+            // Если пользователь отказался от публикации
+            alert('Публикация поста отменена.');
+        }
+
+    }
+
+    //среди друзей ваших друзей найти аккаунт, у которого максимальное количество друзей
+    async function mostPopularFriend() {
+        try {
+            const friends = await $.ajax({
+                url: `https://api.vk.com/method/${'friends.get'}`,
+                data: {
+                    user_id: myAccountId,
+                    access_token: accessToken,
+                    v: '5.199'
+                },
+                dataType: 'jsonp',
+                jsonp: 'callback'
+            });
+            console.log(friends);
+
+            let maxFriends = 0;
+            let popularUser = null;
+            const limit = friends.response.items.length;
+
+            for (const friendId of friends.response.items.slice(0, 5)) {
+                const friend = await $.ajax({
+                    url: `https://api.vk.com/method/${'users.get'}`,
+                    data: {
+                        user_ids: friendId,
+                        fields: 'counters',
+                        access_token: accessToken,
+                        v: '5.199'
+                    },
+                    dataType: 'jsonp',
+                    jsonp: 'callback'
+                });
+
+                console.log(friend)
+                if(friend.response[0].counters && friend.response[0].counters.friends > maxFriends) {
+                    maxFriends = friend.response[0].counters.friends;
+                    popularUser = friend.response[0];
+                }
+                await new Promise(r => setTimeout(r, 500));
+            }
+
+            // Отображение результата
+            const resultContainer = document.getElementById('popularFriendContent');
+            if (popularUser) {
+                resultContainer.innerHTML = `
+                <div>
+                    <h4>Самый популярный друг:</h4>
+                    <p>${popularUser.first_name} ${popularUser.last_name}</p>
+                    <p>Друзей: ${maxFriends}</p>
+                </div>`;
+            } else {
+                resultContainer.innerHTML = '<p>Не удалось найти самого популярного друга.</p>';
+            }
+
+        } catch (e) {
+            alert('Произошла ошибка при отправке запроса: ' + e.message);
+        }
+    }
+    //взять самый последний пост в вашей новостной ленте. Вывести 10 имен друзей автора поста или
+    // 10 имен участников группы - автора поста.
+    async function processNewsfeed() {
+        try {
+            const news =  await $.ajax({
+                url: `https://api.vk.com/method/${'newsfeed.get'}`,
+                data: {
+                    count: 1,
+                    access_token: accessToken,
+                    v: '5.199'
+                },
+                dataType: 'jsonp',
+                jsonp: 'callback'
+            });
+            const post = news.response.items[0];
+
+            let names = [];
+            const limit = 10;
+            if(post.source_id > 0) {
+                const friends =  await $.ajax({
+                    url: `https://api.vk.com/method/${'friends.get'}`,
+                    data: {
+                        user_id: post.source_id,
+                        count: limit,
+                        access_token: accessToken,
+                        v: '5.199'
+                    },
+                    dataType: 'jsonp',
+                    jsonp: 'callback'
+                });
+                names = await getNames(friends.response.items);
+            } else {
+                const groupId = Math.abs(post.source_id);
+                const members = await $.ajax({
+                    url: `https://api.vk.com/method/${'groups.getMembers'}`,
+                    data: {
+                        group_id: groupId,
+                        count: limit,
+                        access_token: accessToken,
+                        v: '5.199'
+                    },
+                    dataType: 'jsonp',
+                    jsonp: 'callback'
+                });
+                names = await getNames(members.response.items);
+            }
+            const isGroup = post.source_id < 0;
+            let response = null;
+            if (isGroup) {
+                response = await $.ajax({
+                url: `https://api.vk.com/method/${'groups.getById'}`,
+                data: {
+                    group_id: Math.abs(post.source_id),
+                    access_token: accessToken,
+                    v: '5.199'
+                },
+                dataType: 'jsonp',
+                jsonp: 'callback'
+            });
+            }else{
+                response = await $.ajax({
+                    url: `https://api.vk.com/method/${'users.get'}`,
+                    data: {
+                        user_ids: Math.abs(post.source_id),
+                        access_token: accessToken,
+                        v: '5.199'
+                    },
+                    dataType: 'jsonp',
+                    jsonp: 'callback'
+                });
+            }
+
+            const name = isGroup
+                ? response.response.groups[0].name
+                : `${response.response[0].first_name} ${response.response[0].last_name}`;
+
+
+            const photo = isGroup
+                ? response.response.groups[0].photo_100
+                : response.response[0].photo_100;
+
+            const attachment = post.attachments && post.attachments[0]?.type === "photo"
+                ? post.attachments[0].photo.sizes[1]?.url
+                : "";
+
+            await new Promise(r => setTimeout(r, 500));
+
+            let postContent = `
+            <div class="post-container">
+                <div class="post-header">
+                    ${photo ? `<img src="${photo}" alt="${name}">` : ''}
+                    <h4>${name}</h4>
+                </div>
+                <div class="post-content">
+                    <p>${post.text || 'Без текста'}</p>
+                    ${attachment ? `<img src="${attachment}" alt="Post image">` : ''}
+                </div>
+                <div class="post-date">${new Date(post.date * 1000).toLocaleString()}</div>
+            </div>`;
+            document.getElementById('lastPostContent').innerHTML = postContent;
+            alert(`Список:\n${names.join('\n')}`);
+
+        } catch(e) {
+            alert('Произошла ошибка при отправке запроса: ' + e.message);
+        }
+
+    }
+
+    async function getNames(ids) {
+        const users = await $.ajax({
+            url: `https://api.vk.com/method/${'users.get'}`,
+            data: {
+                user_ids: ids.join(','),
+                fields: 'name',
+                access_token: accessToken,
+                v: '5.199'
+            },
+            dataType: 'jsonp',
+            jsonp: 'callback'
+        });
+        return users.response.map(u => `${u.first_name} ${u.last_name}`);
+    }
+
+</script>
+</body>
+</html>
