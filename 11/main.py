@@ -12,7 +12,7 @@ import telebot
 from telebot import types
 
 # TG
-TOKEN = '8176634793:AAFjOsiATiI_Zddd-wrILVQ_pgk_JO_ytDs'
+TOKEN = 'TOKEN'
 bot = telebot.TeleBot(TOKEN)
 
 dict_of_names = dict()  # {ID: Names}

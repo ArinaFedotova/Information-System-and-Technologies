@@ -3,12 +3,12 @@ import requests
 from telebot import types
 
 # TG
-TG_TOKEN = '8176634793:AAFjOsiATiI_Zddd-wrILVQ_pgk_JO_ytDs'
+TG_TOKEN = 'TG_TOKEN'
 bot = telebot.TeleBot(TG_TOKEN)
 
 # VK
-VK_ACCESS_TOKEN = 'vk1.a.7XpZHZIC60PMPATlgiLmc3pPa5QorzYLiAhyKog6xHRTwddlkwUo1N6NBn45umsQm2PcG3OPIDhCYA6vcpIbsRLOVuwsapKtrRIWlT5LxMEHzJ6EnhBc4mZU4PVp48TeV485vI9YcjiJ4MXg3SmEvW_d6eBFfcTGsXC5_9q4rkFTavTjzX4708anioGumZkqPhmFfwxUZsGKDKLMB5qRug'
-VK_USER_ID = '391634138'
+VK_ACCESS_TOKEN = 'VK_ACCESS_TOKEN'
+VK_USER_ID = 'VK_USER_ID'
 
 
 def send_to_vk(message_text, chat_id):
